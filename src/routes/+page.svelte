@@ -1,2 +1,22 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import { onMount } from "svelte";
+
+  // onMount(async () => {
+  //   const response = await fetch('/api');
+  //   console.log(await response.text());
+  // });
+
+  $effect(() => {
+    const eventSource = new EventSource("/api");
+    
+    eventSource.onmessage = (event) => {
+      console.log(event.data);
+    };
+
+    return () => {
+      eventSource.close();
+    }
+  });
+</script>
+
+<h1>Server Sent Events?</h1>
