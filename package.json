@@ -58,5 +58,8 @@
 		"onlyBuiltDependencies": [
 			"esbuild"
 		]
+	},
+	"dependencies": {
+		"highcharts": "^12.2.0"
 	}
 }
