@@ -1,22 +1,65 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 
-  // onMount(async () => {
-  //   const response = await fetch('/api');
-  //   console.log(await response.text());
-  // });
+	let chart: any;
+	let Highcharts: any;
+	let eventSource: EventSource | null = null;
 
-  $effect(() => {
-    const eventSource = new EventSource("/api");
-    
-    eventSource.onmessage = (event) => {
-      console.log(event.data);
-    };
+	onMount(async () => {
+		if (!browser) return;
 
-    return () => {
-      eventSource.close();
-    }
-  });
+		// Dynamic import of Highcharts and its modules
+		Highcharts = (await import('highcharts/highstock')).default;
+		await import('highcharts/modules/exporting');
+
+		chart = Highcharts.stockChart('container', {
+			title: {
+				text: 'Real-time mock data'
+			},
+			subtitle: {
+				text: 'Server Sent Events (SSE)'
+			},
+			xAxis: {
+				type: 'datetime'
+			},
+			yAxis: {
+				title: {
+					text: 'Value'
+				}
+			},
+			series: [
+				{
+					name: 'Data',
+					data: [],
+					type: 'spline'
+				}
+			]
+		});
+
+		eventSource = new EventSource('/api');
+		eventSource.onmessage = (event) => {
+			if (!chart) return;
+			const data = JSON.parse(event.data);
+			const point = [new Date(data[0].timestamp).getTime(), data[0].value];
+			const series = chart.series[0];
+			const shift = series.data.length > 20;
+			series.addPoint(point, true, shift);
+		};
+	});
+
+	onDestroy(() => {
+		if (eventSource) {
+			eventSource.close();
+		}
+		if (chart) {
+			chart.destroy();
+		}
+	});
 </script>
 
-<h1>Server Sent Events?</h1>
+<main class="prose mx-auto my-6">
+	<h1 class="text-center">Server Sent Events</h1>
+
+	<div id="container"></div>
+</main>

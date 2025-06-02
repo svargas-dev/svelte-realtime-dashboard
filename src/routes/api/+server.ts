@@ -23,11 +23,11 @@ export const GET: RequestHandler = async ({ }) => {
           // Generate new data points with some randomness
           value = Math.max(0, Math.min(100, value + (Math.random() * 6 - 3)));
 
-          const data: DataPoint = {
+          const data: DataPoint[] = [{
             timestamp: Date.now(),
             value: Math.round(value * 10) / 10,
             name: 'Metric A'
-          };
+          }];
 
           if (isStreamActive) {
             controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
