@@ -46,7 +46,7 @@
 			]
 		});
 
-		eventSource = new EventSource('/api');
+		eventSource = new EventSource('/api/sse');
 		eventSource.onmessage = (event) => {
 			if (!chart) return;
 			const data = JSON.parse(event.data);
